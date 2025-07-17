@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piedra Papel Tijera Visual</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+        
+        .player-score, .pc-score {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 150px;
+        }
+        
+        .player-score {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .pc-score {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        
+        .game-area {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 40px 0;
+            min-height: 200px;
+        }
+        
+        .player-choice, .pc-choice {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .choice-display {
+            font-size: 8em;
+            margin: 20px 0;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .vs {
+            font-size: 3em;
+            font-weight: bold;
+            color: #666;
+            margin: 0 20px;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .choice-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .choice-btn {
+            font-size: 4em;
+            padding: 20px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .choice-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        
+        .choice-btn:active {
+            transform: translateY(0);
+        }
+        
+        .rock { background: #ffcdd2; }
+        .paper { background: #c8e6c9; }
+        .scissors { background: #fff9c4; }
+        
+        .result {
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            margin: 20px 0;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .win { color: #4caf50; }
+        .lose { color: #f44336; }
+        .tie { color: #ff9800; }
+        
+        .reset-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .reset-btn:hover {
+            background: #1976d2;
+        }
+        
+        .game-over {
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 30px 0;
+            padding: 20px;
+            border-radius: 15px;
+        }
+        
+        .game-over.win {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+        
+        .game-over.lose {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎮 Piedra, Papel o Tijera 🎮</h1>
+        
+        <div class="scoreboard">
+            <div class="player-score">
+                <div>👤 TÚ</div>
+                <div id="playerScore">0</div>
+            </div>
+            <div class="pc-score">
+                <div>🤖 PC</div>
+                <div id="pcScore">0</div>
+            </div>
+        </div>
+        
+        <div class="game-area">
+            <div class="player-choice">
+                <h3>Tu elección:</h3>
+                <div class="choice-display" id="playerChoice">❓</div>
+            </div>
+            <div class="vs">VS</div>
+            <div class="pc-choice">
+                <h3>PC elige:</h3>
+                <div class="choice-display" id="pcChoice">❓</div>
+            </div>
+        </div>
+        
+        <div class="result" id="result">¡Elige tu jugada!</div>
+        
+        <div class="controls">
+            <div class="choice-buttons">
+                <button class="choice-btn rock" onclick="jugar(0)">🥌</button>
+                <button class="choice-btn paper" onclick="jugar(1)">📃</button>
+                <button class="choice-btn scissors" onclick="jugar(2)">✂️</button>
+            </div>
+            <button class="reset-btn" onclick="reiniciar()">🔄 Nuevo Juego</button>
+        </div>
+        
+        <div id="gameOver" class="game-over" style="display: none;"></div>
+    </div>
+
+    <script>
+        const opciones = ["🥌", "📃", "✂️"];
+        const nombres = ["Piedra", "Papel", "Tijera"];
+        let triunfos = 0;
+        let perdidas = 0;
+        
+        function jugar(jugador) {
+            if (triunfos >= 3 || perdidas >= 3) return;
+            
+            const pc = Math.floor(Math.random() * 3);
+        
+            document.getElementById('playerChoice').textContent = opciones[jugador];
+            document.getElementById('pcChoice').textContent = opciones[pc];
+            
+            let resultado = "";
+            let clase = "";
+            
+            if (jugador === pc) {
+                resultado = "¡EMPATE!";
+                clase = "tie";
+            } else if ((jugador === 0 && pc === 2) || (jugador === 1 && pc === 0) || (jugador === 2 && pc === 1)) {
+                resultado = "¡GANASTE!";
+                clase = "win";
+                triunfos++;
+            } else {
+                resultado = "¡PERDISTE!";
+                clase = "lose";
+                perdidas++;
+            }
+            
+            const resultElement = document.getElementById('result');
+            resultElement.textContent = resultado;
+            resultElement.className = `result ${clase}`;
+            
+            document.getElementById('playerScore').textContent = triunfos;
+            document.getElementById('pcScore').textContent = perdidas;
+            
+            if (triunfos >= 3 || perdidas >= 3) {
+                mostrarGameOver();
+            }
+        }
+        
+        function mostrarGameOver() {
+            const gameOverElement = document.getElementById('gameOver');
+            if (triunfos >= 3) {
+                gameOverElement.textContent = "🎉 ¡GANASTE LA PARTIDA! 🎉";
+                gameOverElement.className = "game-over win";
+            } else {
+                gameOverElement.textContent = "😢 ¡PERDISTE LA PARTIDA! 😢";
+                gameOverElement.className = "game-over lose";
+            }
+            gameOverElement.style.display = 'block';
+        }
+        
+        function reiniciar() {
+            triunfos = 0;
+            perdidas = 0;
+            document.getElementById('playerScore').textContent = '0';
+            document.getElementById('pcScore').textContent = '0';
+            document.getElementById('playerChoice').textContent = '❓';
+            document.getElementById('pcChoice').textContent = '❓';
+            document.getElementById('result').textContent = '¡Elige tu jugada!';
+            document.getElementById('result').className = 'result';
+            document.getElementById('gameOver').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
